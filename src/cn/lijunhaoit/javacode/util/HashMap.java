@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * 我自己的HashMap
@@ -553,6 +554,209 @@ public class HashMap<K,V> extends AbstractMap<K, V> implements Cloneable,Seriali
                 }
             }
         }
+        return false;
+    }
+
+    public Set<K> keySet(){
+        Set<K> ks = keySet;
+        if(ks == null)
+        {
+            ks = new KeySet();
+            keySet = ks;
+        }
+        return ks;
+    }
+
+    final class KeySet extends AbstractSet<K> {
+        public int size(){
+            return size;
+        }
+
+        public void clear()
+        {
+            HashMap.this.clear();
+
+        }
+
+        public boolean contains(Object o)
+        {
+            return containsKey(o);
+        }
+
+        public boolean remove(Object key)
+        {
+            return removeNode(hash(key),key,null,false,true) != null;
+        }
+
+        public Spliterator<K> spliterator()
+        {
+            return new KeySpliterator<>(HashMap.this,0,-1,0,0);
+        }
+
+        public void forEach(Consumer<? super K> action)
+        {
+            Node<K,V>[] tab;
+            if(action == null)
+                throw new NullPointerException();
+            if(size > 0 && (tab = table) != null)
+            {
+                int mc = modCount;
+                for(int i = 0;i<tab.length;++i)
+                {
+                    for(Node<K,V> e = tab[i]; e != null; e = e.next)
+                    {
+                        action.accept(e.key);
+                    }
+                }
+                if(modCount != mc)
+                {
+                    throw new ConcurrentModificationException();
+                }
+            }
+        }
+    }
+
+    public Collection<V> values(){
+        Collection<V> vs = values;
+        if(vs == null)
+        {
+            vs = new Values();
+            value = vs;
+        }
+        return vs;
+    }
+
+    final class Values extends AbstractCollection<V>{
+
+        @Override
+        public int size()
+        {
+            return size;
+        }
+
+        public void clear()
+        {
+            HashMap.this.clear();
+        }
+
+        @Override
+        public Iterator<V> iterator() {
+            return new ValueIterator();
+        }
+
+        public boolean contains(Object o)
+        {
+            return containsValue(o);
+        }
+
+        public Spliterator<V> spliterator()
+        {
+            return new ValueSpliterator<>(HashMap.this,0,-1,0,0);
+        }
+
+        public void forEach(Consumer<? super V> action)
+        {
+            Node<K,V>[] tab;
+            if(action == null)
+            {
+                throw new NullPointerException();
+            }
+            if(size > 0 && (tab = table) != null)
+            {
+                int mc = modCount;
+                for(int i = 0;i < tab.length; ++i)
+                {
+                    for(Node<K,V> e = tab[i]; e != null; e = e.next)
+                    {
+                        action.accept(e.value);
+                    }
+                    if(modCount != mc)
+                    {
+                        throw new ConcurrentModificationException();
+                    }
+                }
+            }
+        }
+
+        public Set<Map.Entry<K,V>> entrySet(){
+            Set<Map.Entry<K,V>> es;
+            return (es = entrySet) == null ? (entrySet = new EntrySet()) : es;
+        }
+
+        class EntrySet extends AbstractSet<Map.Entry<K,V>>{
+            public int size(){
+                return size;
+            }
+            public void clear()
+            {
+                HashMap.this.clear();
+            }
+
+            public Iterator<Map.Entry<K,V>> iterator()
+            {
+                return new EntryIterator();
+            }
+
+            public boolean contains(Object o){
+                if(!(o instanceof Map.Entry))
+                {
+                    return false;
+                }
+                Map.Entry<?,?> e = (Map.Entry<?,?>) o;
+                Object key = e.getKey();
+                Node<K,V> candidate = getNode(hash(key),key);
+                return candidate != null && candidate.equals(e);
+            }
+
+            public boolean remove(Object o){
+                if(o instanceof  Map.Entry){
+                    Map.Entry<?,?> e = (Map.Entry<?, ?>) o;
+                    Object key = e.getKey();
+                    Object value = e.getValue();
+                    return removeNode(hash(key),key,value,true,true) != null;
+                }
+                return false;
+            }
+
+            public Spliterator<Map.Entry<K,V>> spliterator()
+            {
+                return new EntrySpliterator<>(HashMap.this,0,-1,0,0);
+            }
+
+            public void forEach(Consumer<? super Map.Entry<K,V>> action){
+                        Node<K,V> tab;
+                        if(action == null)
+                        {
+                            throw new NullPointerException();
+                        }
+                        if(size > 0 && (tab = table) != null)
+                        {
+                            int mc = modCount;
+                            for(int i = 0;i <tab.length; ++i){
+                                for(Node<K,V> e = tab[i]; e != null;e = e.next)
+                                {
+                                    action.accept(e);
+                                }
+                                if(modCount != mc)
+                                {
+                                    throw new ConcurrentModificationException();
+                                }
+                            }
+                        }
+            }
+        }
+
+        public V getOrDefault(Object key,V defaultValue)
+        {
+            Node<K,V> e;
+            return(e = getNode(hash(key),key)) == null ? defaultValue : e.value;
+        }
+
+        public V putIfAbsent(K key,V value)
+        {
+            return putVal(hash(key),key,value,true,true);
+        }
+
     }
 
     static final class TreeNode<K,V> extends LinkedHashMap.Entry<K,V> {
