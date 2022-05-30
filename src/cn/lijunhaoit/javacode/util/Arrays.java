@@ -282,13 +282,13 @@ public class Arrays {
         int n = a.length, p, g;
         if (n <= MIN_ARRAY_SORT_GRAN ||
                 (p = ForkJoinPool.getCommonPoolParallelism()) == 1)
-            TimSort.sort(a, 0, n, java.util.Arrays.NaturalOrder.INSTANCE, null, 0, 0);
+            TimSort.sort(a, 0, n, NaturalOrder.INSTANCE, null, 0, 0);
         else
             new ArraysParallelSortHelpers.FJObject.Sorter<T>
                     (null, a,
                             (T[]) Array.newInstance(a.getClass().getComponentType(), n),
                             0, n, 0, ((g = n / (p << 2)) <= MIN_ARRAY_SORT_GRAN) ?
-                            MIN_ARRAY_SORT_GRAN : g, java.util.Arrays.NaturalOrder.INSTANCE).invoke();
+                            MIN_ARRAY_SORT_GRAN : g, NaturalOrder.INSTANCE).invoke();
     }
 
     @SuppressWarnings("unchecked")
@@ -298,19 +298,19 @@ public class Arrays {
         int n = toIndex - fromIndex, p, g;
         if (n <= MIN_ARRAY_SORT_GRAN ||
                 (p = ForkJoinPool.getCommonPoolParallelism()) == 1)
-            TimSort.sort(a, fromIndex, toIndex, java.util.Arrays.NaturalOrder.INSTANCE, null, 0, 0);
+            TimSort.sort(a, fromIndex, toIndex, NaturalOrder.INSTANCE, null, 0, 0);
         else
             new ArraysParallelSortHelpers.FJObject.Sorter<T>
                     (null, a,
                             (T[])Array.newInstance(a.getClass().getComponentType(), n),
                             fromIndex, n, 0, ((g = n / (p << 2)) <= MIN_ARRAY_SORT_GRAN) ?
-                            MIN_ARRAY_SORT_GRAN : g, java.util.Arrays.NaturalOrder.INSTANCE).invoke();
+                            MIN_ARRAY_SORT_GRAN : g, NaturalOrder.INSTANCE).invoke();
     }
 
     @SuppressWarnings("unchecked")
     public static <T> void parallelSort(T[] a, Comparator<? super T> cmp) {
         if (cmp == null)
-            cmp = java.util.Arrays.NaturalOrder.INSTANCE;
+            cmp = NaturalOrder.INSTANCE;
         int n = a.length, p, g;
         if (n <= MIN_ARRAY_SORT_GRAN ||
                 (p = ForkJoinPool.getCommonPoolParallelism()) == 1)
@@ -328,7 +328,7 @@ public class Arrays {
                                         Comparator<? super T> cmp) {
         rangeCheck(a.length, fromIndex, toIndex);
         if (cmp == null)
-            cmp = java.util.Arrays.NaturalOrder.INSTANCE;
+            cmp = NaturalOrder.INSTANCE;
         int n = toIndex - fromIndex, p, g;
         if (n <= MIN_ARRAY_SORT_GRAN ||
                 (p = ForkJoinPool.getCommonPoolParallelism()) == 1)
@@ -349,11 +349,11 @@ public class Arrays {
         private static final boolean userRequested =
                 java.security.AccessController.doPrivileged(
                         new sun.security.action.GetBooleanAction(
-                                "java.util.Arrays.useLegacyMergeSort")).booleanValue();
+                                "useLegacyMergeSort")).booleanValue();
     }
 
     public static void sort(Object[] a) {
-        if (java.util.Arrays.LegacyMergeSort.userRequested)
+        if (LegacyMergeSort.userRequested)
             legacyMergeSort(a);
         else
             ComparableTimSort.sort(a, 0, a.length, null, 0, 0);
@@ -419,7 +419,7 @@ public class Arrays {
      */
     public static void sort(Object[] a, int fromIndex, int toIndex) {
         rangeCheck(a.length, fromIndex, toIndex);
-        if (java.util.Arrays.LegacyMergeSort.userRequested)
+        if (LegacyMergeSort.userRequested)
             legacyMergeSort(a, fromIndex, toIndex);
         else
             ComparableTimSort.sort(a, fromIndex, toIndex, null, 0, 0);
@@ -545,7 +545,7 @@ public class Arrays {
         if (c == null) {
             sort(a);
         } else {
-            if (java.util.Arrays.LegacyMergeSort.userRequested)
+            if (LegacyMergeSort.userRequested)
                 legacyMergeSort(a, c);
             else
                 TimSort.sort(a, 0, a.length, c, null, 0, 0);
@@ -619,7 +619,7 @@ public class Arrays {
             sort(a, fromIndex, toIndex);
         } else {
             rangeCheck(a.length, fromIndex, toIndex);
-            if (java.util.Arrays.LegacyMergeSort.userRequested)
+            if (LegacyMergeSort.userRequested)
                 legacyMergeSort(a, fromIndex, toIndex, c);
             else
                 TimSort.sort(a, fromIndex, toIndex, c, null, 0, 0);
@@ -2910,7 +2910,7 @@ public class Arrays {
     @SafeVarargs
     @SuppressWarnings("varargs")
     public static <T> List<T> asList(T... a) {
-        return new java.util.Arrays.ArrayList<>(a);
+        return new ArrayList<>(a);
     }
 
     /**
@@ -2941,7 +2941,7 @@ public class Arrays {
         public <T> T[] toArray(T[] a) {
             int size = size();
             if (a.length < size)
-                return java.util.Arrays.copyOf(this.a, size,
+                return copyOf(this.a, size,
                         (Class<? extends T[]>) a.getClass());
             System.arraycopy(this.a, 0, a, 0, size);
             if (a.length > size)
@@ -3005,7 +3005,7 @@ public class Arrays {
 
         @Override
         public void sort(Comparator<? super E> c) {
-            java.util.Arrays.sort(a, c);
+            sort(a, c);
         }
     }
 
